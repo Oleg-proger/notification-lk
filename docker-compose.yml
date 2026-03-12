@@ -1,0 +1,72 @@
+version: '3.3'
+
+volumes:
+    pg-data: { }
+
+services:
+    nginx:
+        container_name: expeditors_nginx
+        image: nginx
+        volumes:
+            - ./.docker/conf/nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - .:/var/www/html
+        ports:
+            - "8182:80"
+        restart: always
+        depends_on:
+            - php-fpm
+            - postgres
+        networks:
+            - network1
+
+    php-fpm:
+        container_name: expeditors_php-fpm
+        build: .docker
+        restart: always
+        volumes:
+            - ./.docker/conf/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+            - ./.docker/conf/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+            - .:/var/www/html
+        environment:
+            DB_DATABASE: ${DB_DATABASE}
+            DB_USERNAME: ${DB_USERNAME}
+            DB_HOST: ${DB_HOST}
+            DB_PASSWORD: ${DB_PASSWORD}
+        extra_hosts:
+            - host.docker.internal:host-gateway
+        networks:
+            - network1
+
+    postgres:
+        container_name: expeditors_postgres
+        image: public.ecr.aws/docker/library/postgres:15-alpine
+        hostname: database
+        restart: always
+        volumes:
+            - ./.docker/postgres:/docker-entrypoint-initdb.d
+            - pg-data:/var/lib/postgresql/data:rw
+        environment:
+            - POSTGRES_DB=${DB_DATABASE}
+            - POSTGRES_USER=${DB_USERNAME}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+        ports:
+            - "5431:5432"
+        networks:
+            - network1
+
+    mailhog:
+        container_name: expeditors_mailhog
+        image: mailhog/mailhog:latest
+        restart: always
+        ports:
+            - "1025:1025"
+            - "8025:8025"
+        logging:
+            driver: 'none'
+        networks:
+            - network1
+
+networks:
+    network1:
+        external:
+            name: expeditors
