@@ -27,11 +27,6 @@ services:
             - ./.docker/conf/php/php.ini:/usr/local/etc/php/conf.d/php.ini
             - ./.docker/conf/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
             - .:/var/www/html
-        environment:
-            DB_DATABASE: ${DB_DATABASE}
-            DB_USERNAME: ${DB_USERNAME}
-            DB_HOST: ${DB_HOST}
-            DB_PASSWORD: ${DB_PASSWORD}
         extra_hosts:
             - host.docker.internal:host-gateway
         networks:

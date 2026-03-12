@@ -16,6 +16,6 @@ class PostController extends BaseController
 
         event(new PostCreated($post));
 
-        return $this->sendResponse(true);
+        return $this->sendResponse(true, 201);
     }
 }
